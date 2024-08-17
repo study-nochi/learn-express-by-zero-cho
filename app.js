@@ -30,6 +30,10 @@ const upload = multer({
 })
 
 dotenv.config();
+
+const indexRouter = require('./routes');
+const userRouter = require('./routes/user');
+
 const app = express();
 app.set("port", port);
 
@@ -50,10 +54,12 @@ app.use(session({
   name: 'session-cookie',
 }));
 
-app.get('/', (req, res) => {
-  res.send('Hello, Express');
-});
+app.get('/', indexRouter);
+app.use('/user', userRouter);
 
+app.use((req, res, next) => {
+  res.status(404).send("Not Found");
+});
 
 app.use((err, req, res, next) => {
   console.error(err);
@@ -69,10 +75,7 @@ app.post("/upload", upload.single("image"), (req, res) => {
   res.send("ok");
 })
 
-app.use((req, res, next) => {
-  console.log("모든 요청에 다 실행됩니다.");
-  next();
-});
+
 
 app.get('/', (req, res, next) => {
   console.log("GET / 요청에서만 실행됩니다.");
@@ -80,6 +83,8 @@ app.get('/', (req, res, next) => {
 }, (req, res) => {
   throw new Error("에러는 에러 처리 미들웨어로 갑니다.");
 })
+
+
 
 app.listen(app.get("port"), () => {
   console.log(app.get("port"), "번 포트에서 대기 중");
